@@ -95,13 +95,16 @@ ipcMain.on('JoyStartStop', (event, arg) => {
   console.log(`JoyStartStop Received reply from web page: ${arg}`);
   if(arg === "end"){
     if(!isEmptyObject(port))
-      port.write(PelcoDStop)
+    {
+      currentJoystickDirection = "s"
+      SendJoystickDirectionCommand(currentJoystickDirection)
+    }  
   }
   
 });
 
 function SendJoystickDirectionCommand(JoystickDirection){
-  console.log("Changed!!!!!!! 1")
+  console.log("Changed!!!!!!! ",JoystickDirection)
   switch(JoystickDirection)
       {
         case "r":
@@ -127,6 +130,9 @@ function SendJoystickDirectionCommand(JoystickDirection){
           break;
         case "dr":
           port.write(PelcoDDownRight)
+          break;
+        case "s":
+          port.write(PelcoDStop)
           break;
       }
 }
@@ -270,13 +276,17 @@ function ConvertAndSendCommandsFromJoystick(data){
   let createdByteArray = new Uint8Array([0,1,2,3,4,5,6,7]);
   let axisX = uncomplement(data[0],8);
   let axisY = uncomplement(data[1],8);
-  
-  if(Math.abs(axisX) > 10 || Math.abs(axisY) > 10){
+  let currentJoystickDirection = ""
+
+  if((Math.abs(axisX) > 10 || Math.abs(axisY) > 10)
+      || (Math.abs(axisX) < 10 && Math.abs(axisY) < 10)){
     let angle = radians_to_degrees(Math.atan2(axisX, axisY))+180
     //console.log("X Axis: ",axisX,"Y Axis: ",axisY, "Angle : ",angle)
-    let currentJoystickDirection = ""
+    
     if(!isEmptyObject(port)){
-      if(angle<292.5 && angle > 247.5)
+      if(Math.abs(axisX) < 10 && Math.abs(axisY) < 10){
+        currentJoystickDirection = "s";
+      }else if(angle<292.5 && angle > 247.5)
       { //console.log("Decided Right")
         currentJoystickDirection = "r";
       }else if(angle>=292.5 && angle < 337.5)
