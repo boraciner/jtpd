@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoyToPelco-D</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+
+  
+
+<!-- Bootstrap Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
+
+<script>let $ = require('jquery');</script>
+<script>require('popper.js');</script>
+<script>require('bootstrap');</script>
+<script src="./node_modules/nipplejs/dist/nipplejs.js"></script>
+<style>
+    #zone {
+        position: relative;
+        bottom: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        }
+      body{
+        background: none !important;
+      }
+      
+</style>
+</head>
+<body>
+    
+
+    <ul class="nav nav-tabs d-none" id="myTab" role="tablist" >
+        <li class="nav-item"  role="presentation">
+          <a class="nav-link active" id="vjoy-tab" data-toggle="tab" href="#vjoy" role="tab" aria-controls="vjoy" aria-selected="true">V Joy</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="com-tab" data-toggle="tab" href="#com" role="tab" aria-controls="com" aria-selected="false">COM</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="hwjoy-tab" data-toggle="tab" href="#hwjoy" role="tab" aria-controls="hwjoy" aria-selected="false">HW Joy</a>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="vjoy" role="tabpanel" aria-labelledby="vjoy-tab">
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                <p class="text-right text-danger"><span style="-webkit-app-region: drag">Drag</span></p>
+              </div>
+              <div class="col-sm">
+                <p class="text-right text-danger"><span id="hideElement">Show</span></p>  
+              </div>
+            </div>
+            <div class="row">
+              <div class="zone" ></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="com" role="tabpanel" aria-labelledby="com-tab">
+          <div class="btn-group">
+            <button type="button" class="btn btn-danger dropdown-toggle serialportlist" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Select Port
+            </button>
+            <div class="dropdown-menu comports">
+            </div>
+          </div>
+          <div id="serialusermessage">
+          </div>
+        </div>
+        <div class="tab-pane fade" id="hwjoy" role="tabpanel" aria-labelledby="hwjoy-tab">
+          <div class="btn-group">
+            <button type="button" class="btn btn-danger dropdown-toggle hwjoylist" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Select HW Joy
+            </button>
+            <div class="dropdown-menu hwjoysticks">
+            </div>
+          </div>
+          <div id="hwjoyusermessage">
+          </div>
+        </div>
+      </div>
+
+
+
+      <script type="text/javascript" src="./myJoystick.js"></script>
+      <script type="text/javascript">
+          
+
+          document.querySelector("#hideElement").addEventListener('click', function(){ 
+            console.log("This element ... ",document.querySelector("#hideElement"))
+            if(document.querySelector("#hideElement").innerHTML==="Hide"){
+              document.querySelector(".nav-tabs").classList.add("d-none");
+              document.querySelector("#hideElement").innerHTML = "Show"
+            }else{
+              document.querySelector(".nav-tabs").classList.remove("d-none");
+              document.querySelector("#hideElement").innerHTML = "Hide"
+            }
+          }, false);
+
+          let compPortListHTML = "";
+          ipcRenderer.on('ComPortList', (event, arg) => {
+              compPortListHTML = "";
+              arg.forEach(element => {
+                compPortListHTML += "<a class=\"dropdown-item\" href=\"javascript:call_func_comport('"+element.path+"');\">"+element.path+"</a>";}
+              );
+              document.querySelector(".comports").innerHTML =  compPortListHTML
+            }
+          );
+          let HWJoystickListHTML = "";
+          ipcRenderer.on('HWJoystickList', (event, arg) => {
+              HWJoystickListHTML = "";
+              console.log("HWJoystickList",arg)
+              arg.forEach(element => {
+                HWJoystickListHTML += "<a class=\"dropdown-item\" href=\"javascript:call_func_joystick('"+element+"');\">JoyBus :"+element+"</a>";}
+              );
+              document.querySelector(".hwjoysticks").innerHTML =  HWJoystickListHTML
+            }
+          );
+
+
+           
+          function call_func_comport(port){
+            ipcRenderer.send('ComportSelectCommand', port);
+          }
+          function call_func_joystick(bus){
+            ipcRenderer.send('JoystickSelectCommand', bus);
+          }
+
+          ipcRenderer.on('ComportSelectState', (event, arg) => {
+              console.log("ComportSelectState | "+arg+ " opened successfully!")
+              document.querySelector(".serialportlist").classList.remove("btn-danger")
+              document.querySelector(".serialportlist").classList.add("btn-success")
+
+              document.querySelector("#serialusermessage").innerHTML = 
+              `
+              <div class="alert alert-success" role="alert">
+                  ${arg} Opened!
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              `;
+            }
+          );
+
+          ipcRenderer.on('JoystickSelectState', (event, arg) => {
+              console.log("JoystickSelectState | "+arg+ " opened successfully!")
+              document.querySelector(".hwjoylist").classList.remove("btn-danger")
+              document.querySelector(".hwjoylist").classList.add("btn-success")
+
+              document.querySelector("#hwjoyusermessage").innerHTML = 
+              `
+              <div class="alert alert-success" role="alert">
+                  ${arg} Opened!
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              `;
+            }
+          );  
+          
+
+          ipcRenderer.send('SearchComportsAndHWJoysticks', '');
+          
+
+          
+    </script> 
+
+</body>
+</html>

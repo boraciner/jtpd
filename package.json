@@ -1,0 +1,38 @@
+{
+  "name": "jtpd",
+  "version": "1.1.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:windows": "electron-builder --win --dir",
+    "dist:windows": "electron-builder --win",
+    "publish:github": "electron-builder build --win --publish always"
+  },
+  "build": {
+    "appId": "com.ptz.jtpd",
+    "publish": {
+      "provider": "github",
+      "owner": "boraciner",
+      "repo": "jtpd-electron-updates"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^10.1.5",
+    "electron-builder": "^22.9.1",
+    "electron-rebuild": "^2.3.2"
+  },
+  "dependencies": {
+    "bootstrap": "^4.1.3",
+    "electron-updater": "^4.3.5",
+    "joymap": "^2.2.4",
+    "jquery": "^3.3.1",
+    "nipplejs": "^0.8.7",
+    "popper.js": "^1.14.4",
+    "serialport": "^9.0.2",
+    "usb": "^1.6.3"
+  }
+}
