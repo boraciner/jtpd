@@ -2,6 +2,11 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const SerialPort = require('serialport')
 var usb = require('usb')
 const { autoUpdater } = require('electron-updater');
+const { Menu, Tray } = require('electron');
+const path = require('path');
+
+
+
 
 let PelcoDStop = new Uint8Array([0xFF,0x01,0x00,0x00,0x00,0x00,0x00]);
 let PelcoDUp = new Uint8Array([0xFF,  0x01,  0x00,  0x08,  0x00,	 0x30,  0x00]);
@@ -30,10 +35,28 @@ function radians_to_degrees(radians)
 }
 
 
+function createTray() {
+  const iconPath = path.join(__dirname, 'assets/trayIcon.png');
+  tray = new Tray(iconPath);
 
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Quit',
+      type: 'normal',
+      click() {
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setToolTip('Joy To Pelco-D');
+  tray.setContextMenu(contextMenu);
+}
 
 let win = {};
 function createWindow () {
+  createTray();
+  
   win = new BrowserWindow({
     width: 200,
     height: 200,
@@ -48,6 +71,7 @@ function createWindow () {
   win.loadFile('index.html')
   //win.webContents.openDevTools()
   autoUpdater.checkForUpdatesAndNotify();
+  win.setSkipTaskbar(true);
   
 }
 
