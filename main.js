@@ -104,11 +104,7 @@ ipcMain.on('JoyStartStop', (event, arg) => {
 });
 
 function SendJoystickDirectionCommand(JoystickDirection){
-<<<<<<< HEAD
   console.log("Changed!!!!!!! ",JoystickDirection)
-=======
-  console.log("Changed ",JoystickDirection)
->>>>>>> 2f00606296d6c815c50569146cdd2ac5c80e5b02
   switch(JoystickDirection)
       {
         case "r":
