@@ -9,3 +9,9 @@ libraries
 framework
 
 are used
+
+
+RUN: 
+npm i
+./node_modules/.bin/electron-rebuild
+npm run start

@@ -4,7 +4,7 @@ var usb = require('usb')
 const { autoUpdater } = require('electron-updater');
 const { Menu, Tray } = require('electron');
 const path = require('path');
-
+var pjson = require('./package.json');
 
 
 
@@ -17,6 +17,7 @@ let PelcoDLeft = new Uint8Array([0xFF,  0x01,  0x00,  0x04,  0x30, 0x00,  0x35])
 let PelcoDDown = new Uint8Array([0xFF,  0x01,  0x00,  0x10,  0x00,	0x30,  0x41]);
 let PelcoDDownRight = new Uint8Array([0xFF,  0x01,  0x00,  0x12,  0x30, 0x30,  0x73]);
 let PelcoDDownLeft = new Uint8Array([0xFF,  0x01,  0x00,  0x14,  0x30, 0x30,  0x75]);
+let comPortAliveMessage = new Uint8Array([0xFF,0x01,0x00,0xEF,0x10,0x0B,0x0B]);
 let JoystickDirection = "";
 let SelectedJoystick = {}
 let totalJoyDevices;
@@ -185,26 +186,20 @@ ipcMain.on('JoyDirection', (event, arg) => {
 
 //**********************************************/
 
-
-ipcMain.on('SearchComportsAndHWJoysticks', (event, arg) => {
-  console.log(`SearchComportsAndHWJoysticks Received ${arg}`);
-  SerialPort.list().then(ports => {
-    win.webContents.send('ComPortList',ports)    
-  });
-  totalJoyDevices = usb.findByIds(1973, 790)
-  if(totalJoyDevices)
-    win.webContents.send('HWJoystickList',totalJoyDevices.portNumbers)    
-
- });  
-
  var port = {}
  var portAliveSender;
-  
- let comPortAliveMessage = new Uint8Array([0xFF,0x01,0x00,0xEF,0x10,0x0B,0x0B]);
+ 
 
  //Open Selected Serial Port and return State to HTML begin
  ipcMain.on('ComportSelectCommand', (event, arg) => {
   console.log(`ComportSelectCommand Received reply from web page: ${arg}`);
+  if(Object.keys(port).length !== 0){
+    port.close(function (err) {
+      console.log('port closed', err);
+    });
+    clearInterval(portAliveSender)
+  }
+  
   port = new SerialPort(arg, {
     baudRate: 9600
   })
@@ -221,6 +216,33 @@ ipcMain.on('SearchComportsAndHWJoysticks', (event, arg) => {
 
 
 
+var connectedUsbJoysticksAtBus = []
+ipcMain.on('SearchComportsAndHWJoysticks', (event, arg) => {
+  console.log(`SearchComportsAndHWJoysticks Received ${arg}`);
+  SerialPort.list().then(ports => {
+    win.webContents.send('ComPortList',ports)    
+  });
+  // console.log(usb.getDeviceList())
+  usb.getDeviceList().forEach(element => {
+    console.log("*****************************************")
+    console.log("element  = ",element.deviceDescriptor.idVendor)
+    console.log("element  = ",element.deviceDescriptor.idProduct)
+    console.log("element  = ",element.portNumbers)
+    if(element.deviceDescriptor.idVendor==0x0483 && element.deviceDescriptor.idProduct==0x5710)
+    {
+      connectedUsbJoysticksAtBus.push(element.portNumbers[0])
+    }
+  })
+
+  if(connectedUsbJoysticksAtBus)
+  {
+    console.log("send to webpage joystick bus numbers",connectedUsbJoysticksAtBus)
+    win.webContents.send('HWJoystickList',connectedUsbJoysticksAtBus)
+  }      
+
+  win.webContents.send('versionTag',pjson.version)  
+ });  
+
 
 
 let device = {}
@@ -228,23 +250,37 @@ let myInterface;
 let myEndpoint;
 
 function ConnectToUSBJoystickAndListen(busNumber){
-  console.log("totalJoyDevices" , totalJoyDevices);
-  if(totalJoyDevices.portNumbers.includes(busNumber)){
-    device = totalJoyDevices
-    device.open();
-    myInterface = device.interface(0);
-    myEndpoint = myInterface.endpoints[0];
-    myInterface.claim();
-    win.webContents.send('JoystickSelectState',busNumber)  
+  console.log("ConnectToUSBJoystickAndListen| connectedUsbJoysticksAtBus",connectedUsbJoysticksAtBus)
+  console.log("ConnectToUSBJoystickAndListen| received arg ", busNumber)
 
-    myEndpoint.startPoll(1, 8);
-    myEndpoint.on('data', function (data) {
-      //console.log(data)
-      ConvertAndSendCommandsFromJoystick(data);
-    });
-    myEndpoint.on('error', function (error) {
-      console.log("on error", error);
-    });
+  if(connectedUsbJoysticksAtBus.includes(parseInt(busNumber))){
+    usb.getDeviceList().forEach(t=>{
+      console.log("FILTER ",t)
+      if(t.portNumbers && t.portNumbers.length > 0 &&  parseInt(t.portNumbers[0])==busNumber)
+      {
+        console.log("device",device)
+        if(Object.keys(device).length !== 0){
+          //device.interface(0).endpoints[0].stopPoll()
+          device.interface(0).release([0],err=>{console.error(err)})
+        }
+        device = t;
+        console.log("found device" , device);
+        device.open();
+        myInterface = device.interface(0);
+        myEndpoint = myInterface.endpoints[0];
+        myInterface.claim();
+        win.webContents.send('JoystickSelectState',busNumber)  
+
+        myEndpoint.startPoll(1, 8);
+        myEndpoint.on('data', function (data) {
+          //console.log(data)
+          ConvertAndSendCommandsFromJoystick(data);
+        });
+        myEndpoint.on('error', function (error) {
+          console.log("on error", error);
+        });
+      }
+    })
   }
 }
 
@@ -254,10 +290,6 @@ function ConnectToUSBJoystickAndListen(busNumber){
   ConnectToUSBJoystickAndListen(parseInt(arg,10))
  }); 
 //Open Selected Joystick and return State to HTML end
-
-
-
-
 
 
  function sendComPortAliveMsg() {
@@ -274,8 +306,8 @@ function isEmptyObject(obj) {
 
 function ConvertAndSendCommandsFromJoystick(data){
   let createdByteArray = new Uint8Array([0,1,2,3,4,5,6,7]);
-  let axisX = uncomplement(data[0],8);
-  let axisY = uncomplement(data[1],8);
+  let axisX = uncomplement(data[3],8);
+  let axisY = uncomplement(data[4],8);
   let currentJoystickDirection = ""
 
   if((Math.abs(axisX) > 10 || Math.abs(axisY) > 10)

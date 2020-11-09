@@ -28,21 +28,21 @@
       body{
         background: none !important;
       }
-      
 </style>
 </head>
 <body>
-    
-
     <ul class="nav nav-tabs d-none" id="myTab" role="tablist" >
         <li class="nav-item"  role="presentation">
-          <a class="nav-link active" id="vjoy-tab" data-toggle="tab" href="#vjoy" role="tab" aria-controls="vjoy" aria-selected="true">V Joy</a>
+          <a class="nav-link active text-success" id="vjoy-tab" data-toggle="tab" href="#vjoy" role="tab" aria-controls="vjoy" aria-selected="true">V Joy</a>
         </li>
         <li class="nav-item" role="presentation">
-          <a class="nav-link" id="com-tab" data-toggle="tab" href="#com" role="tab" aria-controls="com" aria-selected="false">COM</a>
+          <a class="nav-link text-success" id="com-tab" data-toggle="tab" href="#com" role="tab" aria-controls="com" aria-selected="false">COM</a>
         </li>
         <li class="nav-item" role="presentation">
-          <a class="nav-link" id="hwjoy-tab" data-toggle="tab" href="#hwjoy" role="tab" aria-controls="hwjoy" aria-selected="false">HW Joy</a>
+          <a class="nav-link text-success" id="hwjoy-tab" data-toggle="tab" href="#hwjoy" role="tab" aria-controls="hwjoy" aria-selected="false">HW Joy</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link text-success" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Info</a>
         </li>
       </ul>
       <div class="tab-content" id="myTabContent">
@@ -83,6 +83,10 @@
           <div id="hwjoyusermessage">
           </div>
         </div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+          <div class="version text-white-50">Ver: <span id="versionTag"></span></div>
+          <div class="text-right text-white-50">Audivo GmbH</div>
+        </div>
       </div>
 
 
@@ -122,6 +126,10 @@
             }
           );
 
+          ipcRenderer.on('versionTag', (event, arg) => {
+              document.querySelector("#versionTag").textContent =  arg
+            }
+          );
 
            
           function call_func_comport(port){
