@@ -218,15 +218,11 @@ ipcMain.on('JoyDirection', (event, arg) => {
 
 var connectedUsbJoysticksAtBus = []
 ipcMain.on('SearchComportsAndHWJoysticks', (event, arg) => {
+  connectedUsbJoysticksAtBus = []
   console.log(`SearchComportsAndHWJoysticks Received ${arg}`);
-  setInterval(()=>{
-
     SerialPort.list().then(ports => {
       win.webContents.send('ComPortList',ports)    
     });
-
-  },1000)
- 
   // console.log(usb.getDeviceList())
   usb.getDeviceList().forEach(element => {
     console.log("*****************************************")

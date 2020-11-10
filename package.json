@@ -11,6 +11,7 @@
   },
   "build": {
     "appId": "com.ptz.jtpd",
+    "icon": "./assets/icon.png",
     "publish": {
       "provider": "github",
       "owner": "boraciner",
