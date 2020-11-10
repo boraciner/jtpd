@@ -59,8 +59,8 @@ function createWindow () {
   createTray();
   
   win = new BrowserWindow({
-    width: 200,
-    height: 200,
+    width: 220,
+    height: 220,
     webPreferences: {
       nodeIntegration: true
     },
@@ -219,9 +219,14 @@ ipcMain.on('JoyDirection', (event, arg) => {
 var connectedUsbJoysticksAtBus = []
 ipcMain.on('SearchComportsAndHWJoysticks', (event, arg) => {
   console.log(`SearchComportsAndHWJoysticks Received ${arg}`);
-  SerialPort.list().then(ports => {
-    win.webContents.send('ComPortList',ports)    
-  });
+  setInterval(()=>{
+
+    SerialPort.list().then(ports => {
+      win.webContents.send('ComPortList',ports)    
+    });
+
+  },1000)
+ 
   // console.log(usb.getDeviceList())
   usb.getDeviceList().forEach(element => {
     console.log("*****************************************")

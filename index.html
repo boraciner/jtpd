@@ -28,6 +28,10 @@
       body{
         background: none !important;
       }
+      .form-control{
+        background-color:rgba(255, 255, 255, 0.3);
+      }
+
 </style>
 </head>
 <body>
@@ -47,17 +51,28 @@
       </ul>
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="vjoy" role="tabpanel" aria-labelledby="vjoy-tab">
-          <div class="container">
+          <div class="container-fluid">
             <div class="row">
-              <div class="col-sm">
-                <p class="text-right text-danger"><span style="-webkit-app-region: drag">Drag</span></p>
+              <div class="col-9">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-danger text-white-50" id="basic-addon1"><img src="./assets/videocam-24px.svg" /></span>
+                  </div>
+                  <input type="text" class="form-control text-dark font-weight-bold" placeholder="" aria-label="" aria-describedby="basic-addon1">
+                </div>
               </div>
-              <div class="col-sm">
-                <p class="text-right text-danger"><span id="hideElement">Show</span></p>  
+              <div class="col-3">
+                <p class="text-right text-danger"><span style="-webkit-app-region: drag">Drag</span></p>
               </div>
             </div>
             <div class="row">
-              <div class="zone" ></div>
+              <div class="col-9"></div>
+              <div class="col-3">
+                <p class="text-right text-danger"><span id="hideElement">Show</span></p>  
+              </div>
+            </div>
+            <div class="row mx-auto">
+              <div class="zone mx-auto" ></div>
             </div>
           </div>
         </div>
@@ -100,8 +115,12 @@
             if(document.querySelector("#hideElement").innerHTML==="Hide"){
               document.querySelector(".nav-tabs").classList.add("d-none");
               document.querySelector("#hideElement").innerHTML = "Show"
+              // document.querySelector(".zone").classList.add("text-focus-in");
+              // document.querySelector(".zone").classList.remove("text-blur-out");
             }else{
               document.querySelector(".nav-tabs").classList.remove("d-none");
+              // document.querySelector(".zone").classList.add("text-blur-out");
+              // document.querySelector(".zone").classList.remove("text-focus-in");
               document.querySelector("#hideElement").innerHTML = "Hide"
             }
           }, false);
