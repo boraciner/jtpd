@@ -9,6 +9,7 @@
 <p align="center">
   <a href="https://https://github.com/boraciner/jtpd">
     <img src="assets/icon.png" alt="Logo" width="80" height="80">
+    <img src="https://miro.medium.com/max/972/1*O6KluMvEBZ1cBL3EPo4tig.png" alt="Logo" width="30" height="30">
   </a>
 
   <h3 align="center">Joystick To Pelco-D Controller</h3>
