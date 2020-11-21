@@ -17,7 +17,7 @@
   <p align="center">
     Electron.js Application 
     <br />
-   Pelco-D Camera Controller sotfware supporting HID and virtual joysticks
+   Pelco-D Camera Controller software supporting HID and virtual joysticks
   </p>
 </p>
 
